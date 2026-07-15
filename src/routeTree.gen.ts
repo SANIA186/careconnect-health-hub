@@ -9,38 +9,233 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as MedicineRouteImport } from './routes/medicine'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VolunteerIndexRouteImport } from './routes/volunteer/index'
+import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
+import { Route as VolunteerQueueRouteImport } from './routes/volunteer/queue'
+import { Route as VolunteerPatientsNewRouteImport } from './routes/volunteer/patients.new'
+import { Route as VolunteerPatientsIdRouteImport } from './routes/volunteer/patients.$id'
+import { Route as VolunteerCampsNewRouteImport } from './routes/volunteer/camps.new'
+import { Route as DoctorConsultationIdRouteImport } from './routes/doctor/consultation.$id'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MedicineRoute = MedicineRouteImport.update({
+  id: '/medicine',
+  path: '/medicine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VolunteerIndexRoute = VolunteerIndexRouteImport.update({
+  id: '/volunteer/',
+  path: '/volunteer/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DoctorIndexRoute = DoctorIndexRouteImport.update({
+  id: '/doctor/',
+  path: '/doctor/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VolunteerQueueRoute = VolunteerQueueRouteImport.update({
+  id: '/volunteer/queue',
+  path: '/volunteer/queue',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VolunteerPatientsNewRoute = VolunteerPatientsNewRouteImport.update({
+  id: '/volunteer/patients/new',
+  path: '/volunteer/patients/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VolunteerPatientsIdRoute = VolunteerPatientsIdRouteImport.update({
+  id: '/volunteer/patients/$id',
+  path: '/volunteer/patients/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VolunteerCampsNewRoute = VolunteerCampsNewRouteImport.update({
+  id: '/volunteer/camps/new',
+  path: '/volunteer/camps/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DoctorConsultationIdRoute = DoctorConsultationIdRouteImport.update({
+  id: '/doctor/consultation/$id',
+  path: '/doctor/consultation/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/medicine': typeof MedicineRoute
+  '/notifications': typeof NotificationsRoute
+  '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
+  '/volunteer/queue': typeof VolunteerQueueRoute
+  '/doctor/': typeof DoctorIndexRoute
+  '/volunteer/': typeof VolunteerIndexRoute
+  '/doctor/consultation/$id': typeof DoctorConsultationIdRoute
+  '/volunteer/camps/new': typeof VolunteerCampsNewRoute
+  '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
+  '/volunteer/patients/new': typeof VolunteerPatientsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/medicine': typeof MedicineRoute
+  '/notifications': typeof NotificationsRoute
+  '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
+  '/volunteer/queue': typeof VolunteerQueueRoute
+  '/doctor': typeof DoctorIndexRoute
+  '/volunteer': typeof VolunteerIndexRoute
+  '/doctor/consultation/$id': typeof DoctorConsultationIdRoute
+  '/volunteer/camps/new': typeof VolunteerCampsNewRoute
+  '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
+  '/volunteer/patients/new': typeof VolunteerPatientsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/medicine': typeof MedicineRoute
+  '/notifications': typeof NotificationsRoute
+  '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
+  '/volunteer/queue': typeof VolunteerQueueRoute
+  '/doctor/': typeof DoctorIndexRoute
+  '/volunteer/': typeof VolunteerIndexRoute
+  '/doctor/consultation/$id': typeof DoctorConsultationIdRoute
+  '/volunteer/camps/new': typeof VolunteerCampsNewRoute
+  '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
+  '/volunteer/patients/new': typeof VolunteerPatientsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/medicine'
+    | '/notifications'
+    | '/reports'
+    | '/settings'
+    | '/volunteer/queue'
+    | '/doctor/'
+    | '/volunteer/'
+    | '/doctor/consultation/$id'
+    | '/volunteer/camps/new'
+    | '/volunteer/patients/$id'
+    | '/volunteer/patients/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/medicine'
+    | '/notifications'
+    | '/reports'
+    | '/settings'
+    | '/volunteer/queue'
+    | '/doctor'
+    | '/volunteer'
+    | '/doctor/consultation/$id'
+    | '/volunteer/camps/new'
+    | '/volunteer/patients/$id'
+    | '/volunteer/patients/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/medicine'
+    | '/notifications'
+    | '/reports'
+    | '/settings'
+    | '/volunteer/queue'
+    | '/doctor/'
+    | '/volunteer/'
+    | '/doctor/consultation/$id'
+    | '/volunteer/camps/new'
+    | '/volunteer/patients/$id'
+    | '/volunteer/patients/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  MedicineRoute: typeof MedicineRoute
+  NotificationsRoute: typeof NotificationsRoute
+  ReportsRoute: typeof ReportsRoute
+  SettingsRoute: typeof SettingsRoute
+  VolunteerQueueRoute: typeof VolunteerQueueRoute
+  DoctorIndexRoute: typeof DoctorIndexRoute
+  VolunteerIndexRoute: typeof VolunteerIndexRoute
+  DoctorConsultationIdRoute: typeof DoctorConsultationIdRoute
+  VolunteerCampsNewRoute: typeof VolunteerCampsNewRoute
+  VolunteerPatientsIdRoute: typeof VolunteerPatientsIdRoute
+  VolunteerPatientsNewRoute: typeof VolunteerPatientsNewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medicine': {
+      id: '/medicine'
+      path: '/medicine'
+      fullPath: '/medicine'
+      preLoaderRoute: typeof MedicineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +243,73 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/volunteer/': {
+      id: '/volunteer/'
+      path: '/volunteer'
+      fullPath: '/volunteer/'
+      preLoaderRoute: typeof VolunteerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/doctor/': {
+      id: '/doctor/'
+      path: '/doctor'
+      fullPath: '/doctor/'
+      preLoaderRoute: typeof DoctorIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/volunteer/queue': {
+      id: '/volunteer/queue'
+      path: '/volunteer/queue'
+      fullPath: '/volunteer/queue'
+      preLoaderRoute: typeof VolunteerQueueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/volunteer/patients/new': {
+      id: '/volunteer/patients/new'
+      path: '/volunteer/patients/new'
+      fullPath: '/volunteer/patients/new'
+      preLoaderRoute: typeof VolunteerPatientsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/volunteer/patients/$id': {
+      id: '/volunteer/patients/$id'
+      path: '/volunteer/patients/$id'
+      fullPath: '/volunteer/patients/$id'
+      preLoaderRoute: typeof VolunteerPatientsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/volunteer/camps/new': {
+      id: '/volunteer/camps/new'
+      path: '/volunteer/camps/new'
+      fullPath: '/volunteer/camps/new'
+      preLoaderRoute: typeof VolunteerCampsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/doctor/consultation/$id': {
+      id: '/doctor/consultation/$id'
+      path: '/doctor/consultation/$id'
+      fullPath: '/doctor/consultation/$id'
+      preLoaderRoute: typeof DoctorConsultationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  MedicineRoute: MedicineRoute,
+  NotificationsRoute: NotificationsRoute,
+  ReportsRoute: ReportsRoute,
+  SettingsRoute: SettingsRoute,
+  VolunteerQueueRoute: VolunteerQueueRoute,
+  DoctorIndexRoute: DoctorIndexRoute,
+  VolunteerIndexRoute: VolunteerIndexRoute,
+  DoctorConsultationIdRoute: DoctorConsultationIdRoute,
+  VolunteerCampsNewRoute: VolunteerCampsNewRoute,
+  VolunteerPatientsIdRoute: VolunteerPatientsIdRoute,
+  VolunteerPatientsNewRoute: VolunteerPatientsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
