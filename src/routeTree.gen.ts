@@ -17,6 +17,7 @@ import { Route as VolunteerQueueRouteImport } from './routes/volunteer/queue'
 import { Route as VolunteerPatientsNewRouteImport } from './routes/volunteer/patients.new'
 import { Route as VolunteerPatientsIdRouteImport } from './routes/volunteer/patients.$id'
 import { Route as VolunteerCampsNewRouteImport } from './routes/volunteer/camps.new'
+import { Route as DoctorConsultationIdRouteImport } from './routes/doctor/consultation.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -58,6 +59,11 @@ const VolunteerCampsNewRoute = VolunteerCampsNewRouteImport.update({
   path: '/volunteer/camps/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DoctorConsultationIdRoute = DoctorConsultationIdRouteImport.update({
+  id: '/doctor/consultation/$id',
+  path: '/doctor/consultation/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/volunteer/queue': typeof VolunteerQueueRoute
   '/doctor/': typeof DoctorIndexRoute
   '/volunteer/': typeof VolunteerIndexRoute
+  '/doctor/consultation/$id': typeof DoctorConsultationIdRoute
   '/volunteer/camps/new': typeof VolunteerCampsNewRoute
   '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
   '/volunteer/patients/new': typeof VolunteerPatientsNewRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/volunteer/queue': typeof VolunteerQueueRoute
   '/doctor': typeof DoctorIndexRoute
   '/volunteer': typeof VolunteerIndexRoute
+  '/doctor/consultation/$id': typeof DoctorConsultationIdRoute
   '/volunteer/camps/new': typeof VolunteerCampsNewRoute
   '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
   '/volunteer/patients/new': typeof VolunteerPatientsNewRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/volunteer/queue': typeof VolunteerQueueRoute
   '/doctor/': typeof DoctorIndexRoute
   '/volunteer/': typeof VolunteerIndexRoute
+  '/doctor/consultation/$id': typeof DoctorConsultationIdRoute
   '/volunteer/camps/new': typeof VolunteerCampsNewRoute
   '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
   '/volunteer/patients/new': typeof VolunteerPatientsNewRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/volunteer/queue'
     | '/doctor/'
     | '/volunteer/'
+    | '/doctor/consultation/$id'
     | '/volunteer/camps/new'
     | '/volunteer/patients/$id'
     | '/volunteer/patients/new'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/volunteer/queue'
     | '/doctor'
     | '/volunteer'
+    | '/doctor/consultation/$id'
     | '/volunteer/camps/new'
     | '/volunteer/patients/$id'
     | '/volunteer/patients/new'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/volunteer/queue'
     | '/doctor/'
     | '/volunteer/'
+    | '/doctor/consultation/$id'
     | '/volunteer/camps/new'
     | '/volunteer/patients/$id'
     | '/volunteer/patients/new'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   VolunteerQueueRoute: typeof VolunteerQueueRoute
   DoctorIndexRoute: typeof DoctorIndexRoute
   VolunteerIndexRoute: typeof VolunteerIndexRoute
+  DoctorConsultationIdRoute: typeof DoctorConsultationIdRoute
   VolunteerCampsNewRoute: typeof VolunteerCampsNewRoute
   VolunteerPatientsIdRoute: typeof VolunteerPatientsIdRoute
   VolunteerPatientsNewRoute: typeof VolunteerPatientsNewRoute
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VolunteerCampsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/doctor/consultation/$id': {
+      id: '/doctor/consultation/$id'
+      path: '/doctor/consultation/$id'
+      fullPath: '/doctor/consultation/$id'
+      preLoaderRoute: typeof DoctorConsultationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   VolunteerQueueRoute: VolunteerQueueRoute,
   DoctorIndexRoute: DoctorIndexRoute,
   VolunteerIndexRoute: VolunteerIndexRoute,
+  DoctorConsultationIdRoute: DoctorConsultationIdRoute,
   VolunteerCampsNewRoute: VolunteerCampsNewRoute,
   VolunteerPatientsIdRoute: VolunteerPatientsIdRoute,
   VolunteerPatientsNewRoute: VolunteerPatientsNewRoute,
