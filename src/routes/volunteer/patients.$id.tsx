@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppShell } from "@/components/care/AppShell";
 import { Card, SectionTitle, StatusPill } from "@/components/care/Cards";
 import { QRPlaceholder } from "@/components/care/QRCode";
-import { patients, buildAiSummary } from "@/lib/care-data";
+import { patients, buildAiSummary, type Patient, type Visit, type Prescription } from "@/lib/care-data";
 import { Activity, Phone, MapPin, User, Stethoscope, Sparkles, AlertTriangle, FileText, Pill } from "lucide-react";
 
 export const Route = createFileRoute("/volunteer/patients/$id")({
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/volunteer/patients/$id")({
 });
 
 function PatientDetail() {
-  const { patient } = Route.useLoaderData();
+  const { patient } = Route.useLoaderData() as { patient: Patient };
   const ai = buildAiSummary(patient);
   return (
     <AppShell title={patient.name} subtitle={`Token #${patient.token} • ${patient.id}`} back="/volunteer/queue">
@@ -94,7 +94,7 @@ function PatientDetail() {
       <SectionTitle>Visit history</SectionTitle>
       {patient.visits.length === 0 && <Card><p className="text-sm text-muted-foreground">No previous visits recorded.</p></Card>}
       <div className="space-y-3">
-        {patient.visits.map((v, i) => (
+        {patient.visits.map((v: Visit, i: number) => (
           <Card key={i}>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="h-2 w-2 rounded-full bg-primary" />
@@ -111,7 +111,7 @@ function PatientDetail() {
               </div>
             </div>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {v.prescriptions.map((rx) => (
+              {v.prescriptions.map((rx: Prescription) => (
                 <span key={rx.medicine} className="inline-flex items-center gap-1 text-[11px] rounded-full bg-accent px-2 py-1 text-accent-foreground">
                   <Pill className="h-3 w-3" />{rx.medicine}
                 </span>

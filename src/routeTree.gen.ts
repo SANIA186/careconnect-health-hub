@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as VolunteerIndexRouteImport } from './routes/volunteer/index'
 import { Route as VolunteerQueueRouteImport } from './routes/volunteer/queue'
 import { Route as VolunteerPatientsNewRouteImport } from './routes/volunteer/patients.new'
+import { Route as VolunteerPatientsIdRouteImport } from './routes/volunteer/patients.$id'
 import { Route as VolunteerCampsNewRouteImport } from './routes/volunteer/camps.new'
 
 const LoginRoute = LoginRouteImport.update({
@@ -41,6 +42,11 @@ const VolunteerPatientsNewRoute = VolunteerPatientsNewRouteImport.update({
   path: '/volunteer/patients/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VolunteerPatientsIdRoute = VolunteerPatientsIdRouteImport.update({
+  id: '/volunteer/patients/$id',
+  path: '/volunteer/patients/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VolunteerCampsNewRoute = VolunteerCampsNewRouteImport.update({
   id: '/volunteer/camps/new',
   path: '/volunteer/camps/new',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/volunteer/queue': typeof VolunteerQueueRoute
   '/volunteer/': typeof VolunteerIndexRoute
   '/volunteer/camps/new': typeof VolunteerCampsNewRoute
+  '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
   '/volunteer/patients/new': typeof VolunteerPatientsNewRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/volunteer/queue': typeof VolunteerQueueRoute
   '/volunteer': typeof VolunteerIndexRoute
   '/volunteer/camps/new': typeof VolunteerCampsNewRoute
+  '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
   '/volunteer/patients/new': typeof VolunteerPatientsNewRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/volunteer/queue': typeof VolunteerQueueRoute
   '/volunteer/': typeof VolunteerIndexRoute
   '/volunteer/camps/new': typeof VolunteerCampsNewRoute
+  '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
   '/volunteer/patients/new': typeof VolunteerPatientsNewRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/volunteer/queue'
     | '/volunteer/'
     | '/volunteer/camps/new'
+    | '/volunteer/patients/$id'
     | '/volunteer/patients/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/volunteer/queue'
     | '/volunteer'
     | '/volunteer/camps/new'
+    | '/volunteer/patients/$id'
     | '/volunteer/patients/new'
   id:
     | '__root__'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/volunteer/queue'
     | '/volunteer/'
     | '/volunteer/camps/new'
+    | '/volunteer/patients/$id'
     | '/volunteer/patients/new'
   fileRoutesById: FileRoutesById
 }
@@ -105,6 +117,7 @@ export interface RootRouteChildren {
   VolunteerQueueRoute: typeof VolunteerQueueRoute
   VolunteerIndexRoute: typeof VolunteerIndexRoute
   VolunteerCampsNewRoute: typeof VolunteerCampsNewRoute
+  VolunteerPatientsIdRoute: typeof VolunteerPatientsIdRoute
   VolunteerPatientsNewRoute: typeof VolunteerPatientsNewRoute
 }
 
@@ -145,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VolunteerPatientsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/volunteer/patients/$id': {
+      id: '/volunteer/patients/$id'
+      path: '/volunteer/patients/$id'
+      fullPath: '/volunteer/patients/$id'
+      preLoaderRoute: typeof VolunteerPatientsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/volunteer/camps/new': {
       id: '/volunteer/camps/new'
       path: '/volunteer/camps/new'
@@ -161,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   VolunteerQueueRoute: VolunteerQueueRoute,
   VolunteerIndexRoute: VolunteerIndexRoute,
   VolunteerCampsNewRoute: VolunteerCampsNewRoute,
+  VolunteerPatientsIdRoute: VolunteerPatientsIdRoute,
   VolunteerPatientsNewRoute: VolunteerPatientsNewRoute,
 }
 export const routeTree = rootRouteImport
