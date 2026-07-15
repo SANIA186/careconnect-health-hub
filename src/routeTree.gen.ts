@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VolunteerIndexRouteImport } from './routes/volunteer/index'
+import { Route as VolunteerCampsNewRouteImport } from './routes/volunteer/camps.new'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -28,35 +29,44 @@ const VolunteerIndexRoute = VolunteerIndexRouteImport.update({
   path: '/volunteer/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VolunteerCampsNewRoute = VolunteerCampsNewRouteImport.update({
+  id: '/volunteer/camps/new',
+  path: '/volunteer/camps/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/volunteer/': typeof VolunteerIndexRoute
+  '/volunteer/camps/new': typeof VolunteerCampsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/volunteer': typeof VolunteerIndexRoute
+  '/volunteer/camps/new': typeof VolunteerCampsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/volunteer/': typeof VolunteerIndexRoute
+  '/volunteer/camps/new': typeof VolunteerCampsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/volunteer/'
+  fullPaths: '/' | '/login' | '/volunteer/' | '/volunteer/camps/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/volunteer'
-  id: '__root__' | '/' | '/login' | '/volunteer/'
+  to: '/' | '/login' | '/volunteer' | '/volunteer/camps/new'
+  id: '__root__' | '/' | '/login' | '/volunteer/' | '/volunteer/camps/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   VolunteerIndexRoute: typeof VolunteerIndexRoute
+  VolunteerCampsNewRoute: typeof VolunteerCampsNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VolunteerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/volunteer/camps/new': {
+      id: '/volunteer/camps/new'
+      path: '/volunteer/camps/new'
+      fullPath: '/volunteer/camps/new'
+      preLoaderRoute: typeof VolunteerCampsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   VolunteerIndexRoute: VolunteerIndexRoute,
+  VolunteerCampsNewRoute: VolunteerCampsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
