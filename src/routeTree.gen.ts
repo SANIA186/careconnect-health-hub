@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as MedicineRouteImport } from './routes/medicine'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
@@ -20,6 +21,11 @@ import { Route as VolunteerPatientsIdRouteImport } from './routes/volunteer/pati
 import { Route as VolunteerCampsNewRouteImport } from './routes/volunteer/camps.new'
 import { Route as DoctorConsultationIdRouteImport } from './routes/doctor/consultation.$id'
 
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MedicineRoute = MedicineRouteImport.update({
   id: '/medicine',
   path: '/medicine',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/medicine': typeof MedicineRoute
+  '/reports': typeof ReportsRoute
   '/volunteer/queue': typeof VolunteerQueueRoute
   '/doctor/': typeof DoctorIndexRoute
   '/volunteer/': typeof VolunteerIndexRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/medicine': typeof MedicineRoute
+  '/reports': typeof ReportsRoute
   '/volunteer/queue': typeof VolunteerQueueRoute
   '/doctor': typeof DoctorIndexRoute
   '/volunteer': typeof VolunteerIndexRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/medicine': typeof MedicineRoute
+  '/reports': typeof ReportsRoute
   '/volunteer/queue': typeof VolunteerQueueRoute
   '/doctor/': typeof DoctorIndexRoute
   '/volunteer/': typeof VolunteerIndexRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/medicine'
+    | '/reports'
     | '/volunteer/queue'
     | '/doctor/'
     | '/volunteer/'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/medicine'
+    | '/reports'
     | '/volunteer/queue'
     | '/doctor'
     | '/volunteer'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/medicine'
+    | '/reports'
     | '/volunteer/queue'
     | '/doctor/'
     | '/volunteer/'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   MedicineRoute: typeof MedicineRoute
+  ReportsRoute: typeof ReportsRoute
   VolunteerQueueRoute: typeof VolunteerQueueRoute
   DoctorIndexRoute: typeof DoctorIndexRoute
   VolunteerIndexRoute: typeof VolunteerIndexRoute
@@ -162,6 +175,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/medicine': {
       id: '/medicine'
       path: '/medicine'
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   MedicineRoute: MedicineRoute,
+  ReportsRoute: ReportsRoute,
   VolunteerQueueRoute: VolunteerQueueRoute,
   DoctorIndexRoute: DoctorIndexRoute,
   VolunteerIndexRoute: VolunteerIndexRoute,
