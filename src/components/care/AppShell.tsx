@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { type ReactNode } from "react";
-import { ArrowLeft, Bell } from "lucide-react";
+import { ArrowLeft, Bell, Home, Users, Pill, BarChart3, Settings, Stethoscope } from "lucide-react";
 
 interface AppShellProps {
   title: string;
@@ -92,7 +92,6 @@ export function BottomNav({ items }: { items: NavItem[] }) {
 }
 
 export function VolunteerNav() {
-  const { Home, Users, Pill, BarChart3, Settings } = require("lucide-react");
   return (
     <BottomNav
       items={[
@@ -107,7 +106,6 @@ export function VolunteerNav() {
 }
 
 export function DoctorNav() {
-  const { Stethoscope, Users, Pill, BarChart3, Settings } = require("lucide-react");
   return (
     <BottomNav
       items={[
