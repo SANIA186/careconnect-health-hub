@@ -77,14 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "NGO CareConnect — Smart Medical Camp Management" },
+      { name: "description", content: "Digital workflow for NGO medical camps: patient registration, queue, consultations, prescriptions, medicine distribution and analytics." },
+      { name: "author", content: "NGO CareConnect" },
+      { property: "og:title", content: "NGO CareConnect — Smart Medical Camp Management" },
+      { property: "og:description", content: "Replace paper-based patient registration with a mobile-first digital workflow for Sunday medical camps." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
