@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VolunteerIndexRouteImport } from './routes/volunteer/index'
+import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
 import { Route as VolunteerQueueRouteImport } from './routes/volunteer/queue'
 import { Route as VolunteerPatientsNewRouteImport } from './routes/volunteer/patients.new'
 import { Route as VolunteerPatientsIdRouteImport } from './routes/volunteer/patients.$id'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 const VolunteerIndexRoute = VolunteerIndexRouteImport.update({
   id: '/volunteer/',
   path: '/volunteer/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DoctorIndexRoute = DoctorIndexRouteImport.update({
+  id: '/doctor/',
+  path: '/doctor/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VolunteerQueueRoute = VolunteerQueueRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/volunteer/queue': typeof VolunteerQueueRoute
+  '/doctor/': typeof DoctorIndexRoute
   '/volunteer/': typeof VolunteerIndexRoute
   '/volunteer/camps/new': typeof VolunteerCampsNewRoute
   '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/volunteer/queue': typeof VolunteerQueueRoute
+  '/doctor': typeof DoctorIndexRoute
   '/volunteer': typeof VolunteerIndexRoute
   '/volunteer/camps/new': typeof VolunteerCampsNewRoute
   '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/volunteer/queue': typeof VolunteerQueueRoute
+  '/doctor/': typeof DoctorIndexRoute
   '/volunteer/': typeof VolunteerIndexRoute
   '/volunteer/camps/new': typeof VolunteerCampsNewRoute
   '/volunteer/patients/$id': typeof VolunteerPatientsIdRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/volunteer/queue'
+    | '/doctor/'
     | '/volunteer/'
     | '/volunteer/camps/new'
     | '/volunteer/patients/$id'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/volunteer/queue'
+    | '/doctor'
     | '/volunteer'
     | '/volunteer/camps/new'
     | '/volunteer/patients/$id'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/volunteer/queue'
+    | '/doctor/'
     | '/volunteer/'
     | '/volunteer/camps/new'
     | '/volunteer/patients/$id'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   VolunteerQueueRoute: typeof VolunteerQueueRoute
+  DoctorIndexRoute: typeof DoctorIndexRoute
   VolunteerIndexRoute: typeof VolunteerIndexRoute
   VolunteerCampsNewRoute: typeof VolunteerCampsNewRoute
   VolunteerPatientsIdRoute: typeof VolunteerPatientsIdRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/volunteer'
       fullPath: '/volunteer/'
       preLoaderRoute: typeof VolunteerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/doctor/': {
+      id: '/doctor/'
+      path: '/doctor'
+      fullPath: '/doctor/'
+      preLoaderRoute: typeof DoctorIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/volunteer/queue': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   VolunteerQueueRoute: VolunteerQueueRoute,
+  DoctorIndexRoute: DoctorIndexRoute,
   VolunteerIndexRoute: VolunteerIndexRoute,
   VolunteerCampsNewRoute: VolunteerCampsNewRoute,
   VolunteerPatientsIdRoute: VolunteerPatientsIdRoute,
