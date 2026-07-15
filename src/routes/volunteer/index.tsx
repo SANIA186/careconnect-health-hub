@@ -63,7 +63,7 @@ function VolunteerHome() {
             <div className="text-[11px] text-muted-foreground">{waiting + inConsult} active tokens</div>
           </div>
         </Link>
-        <Link to="/scan" className="rounded-2xl p-4 bg-card border border-border flex flex-col justify-between h-32">
+        <Link to="/volunteer/patients/$id" params={{ id: "P-1042" }} className="rounded-2xl p-4 bg-card border border-border flex flex-col justify-between h-32">
           <QrCode className="h-6 w-6 text-primary" />
           <div>
             <div className="text-sm font-semibold">Scan passport</div>
