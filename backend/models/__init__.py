@@ -7,3 +7,4 @@ from .medicine import Medicine
 from .dispense_history import DispenseHistory
 from .camp import Camp
 from .camp_assignment import CampAssignment
+from .sms_log import SmsLog
