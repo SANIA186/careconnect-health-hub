@@ -6,7 +6,7 @@ class Prescription(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     consultation_id = db.Column(db.Integer, db.ForeignKey('consultations.id'), nullable=False)
-    medicine_id = db.Column(db.Integer, nullable=True) # Intended as FK but table might not exist yet
+    medicine_id = db.Column(db.Integer, db.ForeignKey('medicines.id'), nullable=True)
     dosage = db.Column(db.String(100), nullable=True)
     frequency = db.Column(db.String(100), nullable=True)
     duration = db.Column(db.String(50), nullable=True)
@@ -14,6 +14,7 @@ class Prescription(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     consultation = db.relationship('Consultation', back_populates='prescriptions')
+    medicine = db.relationship('Medicine', backref='prescriptions')
 
     def to_dict(self):
         return {

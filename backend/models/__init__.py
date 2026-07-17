@@ -3,3 +3,5 @@ from .patient import Patient
 from .queue import Queue
 from .consultation import Consultation
 from .prescription import Prescription
+from .medicine import Medicine
+from .dispense_history import DispenseHistory

@@ -66,7 +66,10 @@ class ConsultationService:
         from services.queue_service import QueueService
         queue_item = Queue.query.filter_by(patient_id=consultation.patient_id, queue_status='In Consultation').first()
         if queue_item:
-            QueueService.update_queue_status(queue_item.id, 'Completed')
+            if consultation.prescriptions:
+                QueueService.update_queue_status(queue_item.id, 'At Pharmacy')
+            else:
+                QueueService.update_queue_status(queue_item.id, 'Completed')
             
         db.session.commit()
         return consultation

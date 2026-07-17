@@ -9,8 +9,10 @@ from routes.patient_routes import patient_bp
 from routes.queue_routes import queue_bp
 from routes.dashboard_routes import dashboard_bp
 from routes.doctor_routes import doctor_bp
-from models import User, Patient, Queue, Consultation, Prescription
+from routes.pharmacy_routes import pharmacy_bp
+from models import User, Patient, Queue, Consultation, Prescription, Medicine
 from sqlalchemy.exc import OperationalError, ProgrammingError
+from datetime import datetime
 def create_app(config_name=None):
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'development')
@@ -40,6 +42,7 @@ def create_app(config_name=None):
     app.register_blueprint(queue_bp, url_prefix='/api/queue')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(doctor_bp, url_prefix='/api')
+    app.register_blueprint(pharmacy_bp, url_prefix='/api/pharmacy')
 
     # Global error handlers
     @app.errorhandler(400)
@@ -79,6 +82,20 @@ def create_app(config_name=None):
                 db.session.add_all([admin, doctor, volunteer])
                 db.session.commit()
                 app.logger.info("Seed data created successfully.")
+            
+            if not Medicine.query.first():
+                paracetamol = Medicine(
+                    medicine_name="Paracetamol",
+                    category="Painkiller",
+                    manufacturer="PharmaInc",
+                    batch_number="B123",
+                    expiry_date=datetime.strptime('2028-01-01', '%Y-%m-%d').date(),
+                    stock_quantity=100,
+                    unit="Tablets",
+                    reorder_level=20
+                )
+                db.session.add(paracetamol)
+                db.session.commit()
         except (OperationalError, ProgrammingError):
             pass
 
