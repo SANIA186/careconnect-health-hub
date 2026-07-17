@@ -5,3 +5,5 @@ from .consultation import Consultation
 from .prescription import Prescription
 from .medicine import Medicine
 from .dispense_history import DispenseHistory
+from .camp import Camp
+from .camp_assignment import CampAssignment

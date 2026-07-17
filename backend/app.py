@@ -10,7 +10,8 @@ from routes.queue_routes import queue_bp
 from routes.dashboard_routes import dashboard_bp
 from routes.doctor_routes import doctor_bp
 from routes.pharmacy_routes import pharmacy_bp
-from models import User, Patient, Queue, Consultation, Prescription, Medicine
+from routes.camp_routes import camp_bp, camp_dashboard_bp
+from models import User, Patient, Queue, Consultation, Prescription, Medicine, Camp, CampAssignment
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from datetime import datetime
 def create_app(config_name=None):
@@ -43,6 +44,8 @@ def create_app(config_name=None):
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(doctor_bp, url_prefix='/api')
     app.register_blueprint(pharmacy_bp, url_prefix='/api/pharmacy')
+    app.register_blueprint(camp_bp, url_prefix='/api/camps')
+    app.register_blueprint(camp_dashboard_bp, url_prefix='/api/camp-dashboard')
 
     # Global error handlers
     @app.errorhandler(400)

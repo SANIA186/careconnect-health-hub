@@ -13,13 +13,16 @@ class Patient(db.Model):
     village = db.Column(db.String(100), nullable=False)
     address = db.Column(db.Text, nullable=False)
     blood_group = db.Column(db.String(10), nullable=True)
-    emergency_contact = db.Column(db.String(20), nullable=True)
-    status = db.Column(db.String(50), nullable=False, default='Waiting') # Waiting, In Consultation, Completed
+    emergency_contact = db.Column(db.String(50), nullable=True)
+    status = db.Column(db.String(50), default='Waiting') # Waiting, In Consultation, Completed
+    camp_id = db.Column(db.Integer, db.ForeignKey('camps.id'), nullable=True)
+
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     queues = db.relationship('Queue', back_populates='patient', cascade='all, delete-orphan')
     consultations = db.relationship('Consultation', back_populates='patient', cascade='all, delete-orphan')
+    camp = db.relationship('Camp', back_populates='patients')
 
     def to_dict(self):
         return {
@@ -34,6 +37,7 @@ class Patient(db.Model):
             "blood_group": self.blood_group,
             "emergency_contact": self.emergency_contact,
             "status": self.status,
+            "camp_id": self.camp_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "consultations": [c.to_dict() for c in self.consultations] if hasattr(self, 'consultations') else []
