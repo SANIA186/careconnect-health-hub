@@ -5,7 +5,11 @@ from config import config_by_name
 from database import db, migrate, jwt, cors, bcrypt
 from routes.health import health_bp
 from routes.auth import auth_bp
-from models import User
+from routes.patient_routes import patient_bp
+from routes.queue_routes import queue_bp
+from routes.dashboard_routes import dashboard_bp
+from routes.doctor_routes import doctor_bp
+from models import User, Patient, Queue, Consultation, Prescription
 from sqlalchemy.exc import OperationalError, ProgrammingError
 def create_app(config_name=None):
     if config_name is None:
@@ -32,6 +36,10 @@ def create_app(config_name=None):
     # Register blueprints
     app.register_blueprint(health_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(patient_bp, url_prefix='/api/patients')
+    app.register_blueprint(queue_bp, url_prefix='/api/queue')
+    app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+    app.register_blueprint(doctor_bp, url_prefix='/api')
 
     # Global error handlers
     @app.errorhandler(400)
