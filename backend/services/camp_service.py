@@ -73,16 +73,23 @@ class CampService:
         patient_ids = [p.id for p in patients]
         
         total_patients = len(patients)
-        completed_consultations = Consultation.query.filter(
-            Consultation.patient_id.in_(patient_ids) if patient_ids else False,
-            Consultation.consultation_status == 'Completed'
-        ).count() if patient_ids else 0
         
-        medicines_dispensed = db.session.query(db.func.sum(DispenseHistory.dispensed_quantity)).filter(
-            DispenseHistory.patient_id.in_(patient_ids) if patient_ids else False
-        ).scalar() or 0 if patient_ids else 0
+        if patient_ids:
+            completed_consultations = Consultation.query.filter(
+                Consultation.patient_id.in_(patient_ids),
+                Consultation.consultation_status == 'Completed'
+            ).count()
+            
+            medicines_dispensed = db.session.query(
+                db.func.sum(DispenseHistory.dispensed_quantity)
+            ).filter(
+                DispenseHistory.patient_id.in_(patient_ids)
+            ).scalar() or 0
+        else:
+            completed_consultations = 0
+            medicines_dispensed = 0
         
-        pending_patients = len([p for p in patients if p.status != 'Completed'])
+        pending_patients = len([p for p in patients if p.status not in ('Completed',)])
         
         return {
             "total_patients": total_patients,

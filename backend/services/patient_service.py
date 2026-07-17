@@ -29,6 +29,7 @@ class PatientService:
             address=data.get('address'),
             blood_group=data.get('blood_group'),
             emergency_contact=data.get('emergency_contact'),
+            camp_id=data.get('camp_id'),
             status='Waiting'
         )
         
