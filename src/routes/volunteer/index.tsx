@@ -1,7 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, BellButton, VolunteerNav } from "@/components/care/AppShell";
 import { Card, SectionTitle, StatCard, StatusPill } from "@/components/care/Cards";
-import { camps, currentCamp, patients } from "@/lib/care-data";
+import SmartQueue from "@/components/care/SmartQueue.tsx";
+import { getCamps, getCurrentCamp } from "@/api/camp.api";
+import { getPatients } from "@/api/patient.api";
+import { useEffect, useState } from "react";
 import { Users, Clock, CheckCircle2, Plus, UserPlus, QrCode, Tent, MapPin, CalendarDays } from "lucide-react";
 
 export const Route = createFileRoute("/volunteer/")({
@@ -10,6 +13,21 @@ export const Route = createFileRoute("/volunteer/")({
 });
 
 function VolunteerHome() {
+  const [patients, setPatients] = useState<Awaited<ReturnType<typeof getPatients>>>([]);
+  const [currentCamp, setCurrentCamp] = useState<Awaited<ReturnType<typeof getCurrentCamp>> | null>(null);
+  const [camps, setCamps] = useState<Awaited<ReturnType<typeof getCamps>>>([]);
+
+  useEffect(() => {
+    void (async () => {
+      const [patientData, campData, campsData] = await Promise.all([getPatients(), getCurrentCamp(), getCamps()]);
+      setPatients(patientData);
+      setCurrentCamp(campData);
+      setCamps(campsData);
+    })();
+  }, []);
+
+  if (!currentCamp) return null;
+
   const waiting = patients.filter((p) => p.status === "waiting").length;
   const inConsult = patients.filter((p) => p.status === "in-consultation").length;
   const completed = patients.filter((p) => p.status === "completed").length;
@@ -17,14 +35,14 @@ function VolunteerHome() {
 
   return (
     <AppShell title="Namaste, Priya" subtitle="Volunteer • Rampur Team" hero actions={<BellButton />} bottomNav={<VolunteerNav />}>
-      <Card className="!bg-white/10 !border-white/20 -mt-4 text-white backdrop-blur">
+      <Card className="-mt-4">
         <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5 text-[11px] text-white/80">
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <Tent className="h-3 w-3" /> Active camp
             </div>
             <div className="mt-0.5 font-semibold truncate">{currentCamp.name}</div>
-            <div className="mt-1 flex items-center gap-3 text-[11px] text-white/80">
+            <div className="mt-1 flex items-center gap-3 text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{currentCamp.date}</span>
               <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{currentCamp.location}</span>
             </div>
@@ -39,6 +57,9 @@ function VolunteerHome() {
         <StatCard label="In consult" value={inConsult} icon={<Users className="h-4 w-4" />} />
         <StatCard label="Done" value={completed} tone="success" icon={<CheckCircle2 className="h-4 w-4" />} />
       </div>
+      <SectionTitle>Smart Queue</SectionTitle>
+
+      <SmartQueue patients={patients} />
 
       <SectionTitle>Quick actions</SectionTitle>
       <div className="grid grid-cols-2 gap-3">

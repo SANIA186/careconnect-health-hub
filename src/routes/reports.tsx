@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, VolunteerNav } from "@/components/care/AppShell";
 import { Card, SectionTitle, StatCard } from "@/components/care/Cards";
-import { analytics, camps, currentCamp, patients } from "@/lib/care-data";
+import { getReportAnalytics } from "@/api/report.api";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from "recharts";
-import { Users, HeartPulse, Pill, TrendingUp, Download, CalendarDays, MapPin } from "lucide-react";
-import { useState } from "react";
+import { Users, HeartPulse, Pill, TrendingUp, Download, CalendarDays, MapPin, ShieldCheck, Clock3, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/reports")({
   component: Reports,
@@ -15,6 +15,16 @@ const COLORS = ["oklch(0.55 0.18 250)", "oklch(0.7 0.15 235)", "oklch(0.78 0.14 
 
 function Reports() {
   const [tab, setTab] = useState<"analytics" | "history" | "report">("analytics");
+  const [report, setReport] = useState<Awaited<ReturnType<typeof getReportAnalytics>> | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      setReport(await getReportAnalytics());
+    })();
+  }, []);
+
+  if (!report) return null;
+
   return (
     <AppShell title="Reports" subtitle="Camp analytics & history" hero back="/volunteer" bottomNav={<VolunteerNav />}>
       <div className="-mt-3 flex gap-1 bg-white/15 rounded-2xl p-1">
@@ -26,22 +36,72 @@ function Reports() {
         ))}
       </div>
 
-      {tab === "analytics" && <Analytics />}
-      {tab === "history" && <PatientHistory />}
-      {tab === "report" && <CampReport />}
+      {tab === "analytics" && <Analytics report={report} />}
+      {tab === "history" && <PatientHistory report={report} />}
+      {tab === "report" && <CampReport report={report} />}
     </AppShell>
   );
 }
 
-function Analytics() {
+function Analytics({ report }: { report: Awaited<ReturnType<typeof getReportAnalytics>> }) {
+  const analytics = {
+    ageDistribution: [
+      { group: "0-12", count: 38 }, { group: "13-25", count: 42 },
+      { group: "26-45", count: 78 }, { group: "46-60", count: 56 }, { group: "60+", count: 44 },
+    ],
+    genderDistribution: [
+      { name: "Female", value: 132 }, { name: "Male", value: 108 }, { name: "Other", value: 18 },
+    ],
+    commonIllnesses: [
+      { name: "Respiratory", count: 68 }, { name: "Hypertension", count: 52 },
+      { name: "Skin", count: 38 }, { name: "Gastric", count: 34 },
+      { name: "Joint pain", count: 28 }, { name: "Diabetes", count: 22 },
+    ],
+    medicinesDistributed: [
+      { name: "Paracetamol", count: 128 }, { name: "ORS", count: 62 },
+      { name: "Cetirizine", count: 74 }, { name: "Iron+FA", count: 88 },
+      { name: "Pantoprazole", count: 40 }, { name: "Amoxicillin", count: 46 },
+    ],
+    campTrend: [
+      { camp: "May 31", patients: 39 }, { camp: "Jun 7", patients: 44 },
+      { camp: "Jun 14", patients: 51 }, { camp: "Jun 21", patients: 47 },
+      { camp: "Jun 28", patients: 54 }, { camp: "Jul 5", patients: 68 },
+      { camp: "Jul 12", patients: 42 },
+    ],
+  };
+
   return (
     <div className="mt-6 space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Total patients" value={258} icon={<Users className="h-4 w-4" />} />
-        <StatCard label="Consultations" value={241} tone="success" icon={<HeartPulse className="h-4 w-4" />} />
-        <StatCard label="Medicines" value={438} icon={<Pill className="h-4 w-4" />} />
-        <StatCard label="Referrals" value={17} tone="warning" icon={<TrendingUp className="h-4 w-4" />} />
+        <StatCard label="Total patients" value={report.patients.length} icon={<Users className="h-4 w-4" />} />
+        <StatCard label="Consultations" value={report.totals.consultations} tone="success" icon={<HeartPulse className="h-4 w-4" />} />
+        <StatCard label="Medicines" value={report.totals.medicines} icon={<Pill className="h-4 w-4" />} />
+        <StatCard label="Referrals" value={report.totals.referrals} tone="warning" icon={<TrendingUp className="h-4 w-4" />} />
       </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Card>
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <ShieldCheck className="h-4 w-4 text-primary" /> Volunteer coverage
+          </div>
+          <div className="mt-2 text-2xl font-bold tabular-nums">{report.currentCamp.volunteers}</div>
+          <div className="mt-1 text-xs text-muted-foreground">Active volunteers rostered for this camp</div>
+        </Card>
+        <Card>
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <Clock3 className="h-4 w-4 text-primary" /> Avg. wait
+          </div>
+          <div className="mt-2 text-2xl font-bold tabular-nums">18 min</div>
+          <div className="mt-1 text-xs text-muted-foreground">Improved from the previous weekend visit</div>
+        </Card>
+      </div>
+
+      <Card className="!border-primary/20 !bg-primary/5">
+        <div className="flex items-center gap-2 text-primary">
+          <Sparkles className="h-4 w-4" /> NGO insight
+        </div>
+        <div className="mt-2 text-sm font-semibold">Community reach is growing, with higher attendance and strong medicine utilization at the latest camp.</div>
+      </Card>
 
       <SectionTitle>Camp performance</SectionTitle>
       <Card>
@@ -134,11 +194,11 @@ function Analytics() {
   );
 }
 
-function PatientHistory() {
+function PatientHistory({ report }: { report: Awaited<ReturnType<typeof getReportAnalytics>> }) {
   return (
     <div className="mt-6 space-y-3">
       <SectionTitle>Recent patients</SectionTitle>
-      {patients.map((p) => (
+      {report.patients.map((p) => (
         <Card key={p.id}>
           <div className="flex items-center justify-between">
             <div className="min-w-0">
@@ -154,24 +214,24 @@ function PatientHistory() {
   );
 }
 
-function CampReport() {
+function CampReport({ report }: { report: Awaited<ReturnType<typeof getReportAnalytics>> }) {
   return (
     <div className="mt-6 space-y-4">
       <Card>
         <div className="text-xs font-semibold text-primary uppercase tracking-wide">Camp report</div>
-        <div className="mt-1 font-bold text-lg">{currentCamp.name}</div>
+        <div className="mt-1 font-bold text-lg">{report.currentCamp.name}</div>
         <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{currentCamp.date}</span>
-          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{currentCamp.location}</span>
+          <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{report.currentCamp.date}</span>
+          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{report.currentCamp.location}</span>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
           {[
-            ["Patients served", currentCamp.patientsServed],
+            ["Patients served", report.currentCamp.patientsServed],
             ["Consultations", 41],
             ["Prescriptions", 118],
             ["Referrals", 4],
-            ["Volunteers", currentCamp.volunteers],
-            ["Doctors", currentCamp.doctors],
+            ["Volunteers", report.currentCamp.volunteers],
+            ["Doctors", report.currentCamp.doctors],
           ].map(([l, v]) => (
             <div key={String(l)} className="rounded-xl bg-secondary/60 p-3">
               <div className="text-[11px] text-muted-foreground">{l}</div>
@@ -185,7 +245,7 @@ function CampReport() {
       </Card>
 
       <SectionTitle>All camps</SectionTitle>
-      {camps.map((c) => (
+      {report.camps.map((c) => (
         <Card key={c.id}>
           <div className="flex items-center justify-between">
             <div className="min-w-0">

@@ -1,14 +1,16 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppShell } from "@/components/care/AppShell";
 import { Card, SectionTitle, StatusPill } from "@/components/care/Cards";
-import { QRPlaceholder } from "@/components/care/QRCode";
-import { patients, buildAiSummary, type Patient, type Visit, type Prescription } from "@/lib/care-data";
+import CareMemoryCard from "@/components/care/CareMemoryCard";
+import HealthPassport from "@/components/care/HealthPassport";
+import { getPatientById, buildAiSummary } from "@/api/patient.api";
+import type { Patient, Visit, Prescription } from "@/types/patient";
 import { Activity, Phone, MapPin, User, Stethoscope, Sparkles, AlertTriangle, FileText, Pill } from "lucide-react";
 
 export const Route = createFileRoute("/volunteer/patients/$id")({
   component: PatientDetail,
-  loader: ({ params }) => {
-    const patient = patients.find((p) => p.id === params.id);
+  loader: async ({ params }) => {
+    const patient = await getPatientById(params.id);
     if (!patient) throw notFound();
     return { patient };
   },
@@ -28,24 +30,8 @@ function PatientDetail() {
   const ai = buildAiSummary(patient);
   return (
     <AppShell title={patient.name} subtitle={`Token #${patient.token} • ${patient.id}`} back="/volunteer/queue">
-      <Card className="bg-gradient-to-br from-accent/60 to-card">
-        <div className="flex items-center gap-4">
-          <div className="text-primary shrink-0">
-            <QRPlaceholder value={patient.id} size={104} />
-          </div>
-          <div className="min-w-0">
-            <div className="text-[11px] font-semibold text-primary uppercase tracking-wide">Health Passport</div>
-            <div className="mt-1 font-semibold truncate">{patient.name}</div>
-            <div className="text-xs text-muted-foreground">{patient.id}</div>
-            <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-1"><User className="h-3 w-3" />{patient.age}y {patient.gender}</span>
-              <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{patient.phone}</span>
-              <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{patient.village}</span>
-            </div>
-            <div className="mt-2"><StatusPill status={patient.status} /></div>
-          </div>
-        </div>
-      </Card>
+      <HealthPassport patient={patient} />
+      <div className="mt-3"><StatusPill status={patient.status} /></div>
 
       <SectionTitle>Vitals</SectionTitle>
       <Card>
@@ -69,6 +55,9 @@ function PatientDetail() {
         <p className="text-sm text-foreground">{patient.symptoms}</p>
         <p className="mt-2 text-xs text-muted-foreground">{patient.volunteerNotes}</p>
       </Card>
+      <SectionTitle>Care Memory</SectionTitle>
+
+      <CareMemoryCard patient={patient} />
 
       <SectionTitle>AI consultation summary</SectionTitle>
       <Card className="!bg-primary/5 !border-primary/20">

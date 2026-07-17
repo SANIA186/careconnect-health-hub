@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, VolunteerNav } from "@/components/care/AppShell";
 import { Card, StatusPill } from "@/components/care/Cards";
-import { currentCamp, patients, type QueueStatus } from "@/lib/care-data";
+import { getCurrentCamp } from "@/api/camp.api";
+import { getPatientsByStatus } from "@/api/patient.api";
+import type { QueueStatus } from "@/types/patient";
 import { Search, Filter, ChevronRight, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/volunteer/queue")({
   component: Queue,
@@ -20,6 +22,19 @@ const filters: { id: "all" | QueueStatus; label: string }[] = [
 function Queue() {
   const [filter, setFilter] = useState<(typeof filters)[number]["id"]>("all");
   const [q, setQ] = useState("");
+  const [patients, setPatients] = useState<Awaited<ReturnType<typeof getPatientsByStatus>>>([]);
+  const [currentCamp, setCurrentCamp] = useState<Awaited<ReturnType<typeof getCurrentCamp>> | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const [patientData, campData] = await Promise.all([getPatientsByStatus("all"), getCurrentCamp()]);
+      setPatients(patientData);
+      setCurrentCamp(campData);
+    })();
+  }, []);
+
+  if (!currentCamp) return null;
+
   const list = patients
     .filter((p) => filter === "all" || p.status === filter)
     .filter((p) => !q || p.name.toLowerCase().includes(q.toLowerCase()) || String(p.token).includes(q));

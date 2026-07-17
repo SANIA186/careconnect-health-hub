@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HeartPulse, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
+// import QuickStats from "@/components/care/QuickStats";
+import SmartQueue from "@/components/care/SmartQueue";
 
 export const Route = createFileRoute("/")({
   component: Splash,

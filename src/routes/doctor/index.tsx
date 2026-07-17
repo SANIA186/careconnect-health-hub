@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, BellButton, DoctorNav } from "@/components/care/AppShell";
 import { Card, SectionTitle, StatCard, StatusPill } from "@/components/care/Cards";
-import { currentCamp, patients } from "@/lib/care-data";
+import { getCurrentCamp } from "@/api/camp.api";
+import { getPatients } from "@/api/patient.api";
+import type { Patient } from "@/types/patient";
 import { Clock, CheckCircle2, Users, ChevronRight, User, Stethoscope } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/doctor/")({
   component: DoctorHome,
@@ -10,6 +13,19 @@ export const Route = createFileRoute("/doctor/")({
 });
 
 function DoctorHome() {
+  const [patients, setPatients] = useState<Awaited<ReturnType<typeof getPatients>>>([]);
+  const [currentCamp, setCurrentCamp] = useState<Awaited<ReturnType<typeof getCurrentCamp>> | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const [patientData, campData] = await Promise.all([getPatients(), getCurrentCamp()]);
+      setPatients(patientData);
+      setCurrentCamp(campData);
+    })();
+  }, []);
+
+  if (!currentCamp) return null;
+
   const waiting = patients.filter((p) => p.status === "waiting");
   const active = patients.filter((p) => p.status === "in-consultation");
   const done = patients.filter((p) => p.status === "completed").length;
@@ -49,7 +65,7 @@ function DoctorHome() {
   );
 }
 
-function ConsultRow({ p, accent }: { p: (typeof patients)[number]; accent?: boolean }) {
+function ConsultRow({ p, accent }: { p: Patient; accent?: boolean }) {
   return (
     <Link to="/doctor/consultation/$id" params={{ id: p.id }}>
       <Card className={accent ? "!border-primary/40 !bg-primary/5" : ""}>
