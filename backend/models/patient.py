@@ -19,6 +19,8 @@ class Patient(db.Model):
 
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    qr_token = db.Column(db.String(100), unique=True, nullable=True, index=True)
+    qr_created_at = db.Column(db.DateTime, nullable=True)
 
     queues = db.relationship('Queue', back_populates='patient', cascade='all, delete-orphan')
     consultations = db.relationship('Consultation', back_populates='patient', cascade='all, delete-orphan')
@@ -38,6 +40,8 @@ class Patient(db.Model):
             "emergency_contact": self.emergency_contact,
             "status": self.status,
             "camp_id": self.camp_id,
+            "qr_token": self.qr_token,
+            "qr_created_at": self.qr_created_at.isoformat() if self.qr_created_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "consultations": [c.to_dict() for c in self.consultations] if hasattr(self, 'consultations') else []
