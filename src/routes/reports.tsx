@@ -44,38 +44,15 @@ function Reports() {
 }
 
 function Analytics({ report }: { report: Awaited<ReturnType<typeof getReportAnalytics>> }) {
-  const analytics = {
-    ageDistribution: [
-      { group: "0-12", count: 38 }, { group: "13-25", count: 42 },
-      { group: "26-45", count: 78 }, { group: "46-60", count: 56 }, { group: "60+", count: 44 },
-    ],
-    genderDistribution: [
-      { name: "Female", value: 132 }, { name: "Male", value: 108 }, { name: "Other", value: 18 },
-    ],
-    commonIllnesses: [
-      { name: "Respiratory", count: 68 }, { name: "Hypertension", count: 52 },
-      { name: "Skin", count: 38 }, { name: "Gastric", count: 34 },
-      { name: "Joint pain", count: 28 }, { name: "Diabetes", count: 22 },
-    ],
-    medicinesDistributed: [
-      { name: "Paracetamol", count: 128 }, { name: "ORS", count: 62 },
-      { name: "Cetirizine", count: 74 }, { name: "Iron+FA", count: 88 },
-      { name: "Pantoprazole", count: 40 }, { name: "Amoxicillin", count: 46 },
-    ],
-    campTrend: [
-      { camp: "May 31", patients: 39 }, { camp: "Jun 7", patients: 44 },
-      { camp: "Jun 14", patients: 51 }, { camp: "Jun 21", patients: 47 },
-      { camp: "Jun 28", patients: 54 }, { camp: "Jul 5", patients: 68 },
-      { camp: "Jul 12", patients: 42 },
-    ],
-  };
+  const analytics = report.analytics;
 
   return (
     <div className="mt-6 space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Total patients" value={report.patients.length} icon={<Users className="h-4 w-4" />} />
+        <StatCard label="Total patients" value={report.totals.patients} icon={<Users className="h-4 w-4" />} />
         <StatCard label="Consultations" value={report.totals.consultations} tone="success" icon={<HeartPulse className="h-4 w-4" />} />
         <StatCard label="Medicines" value={report.totals.medicines} icon={<Pill className="h-4 w-4" />} />
+        {/* Referrals not tracked separately in backend — shown as 0 until backend support is added */}
         <StatCard label="Referrals" value={report.totals.referrals} tone="warning" icon={<TrendingUp className="h-4 w-4" />} />
       </div>
 
@@ -84,7 +61,7 @@ function Analytics({ report }: { report: Awaited<ReturnType<typeof getReportAnal
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <ShieldCheck className="h-4 w-4 text-primary" /> Volunteer coverage
           </div>
-          <div className="mt-2 text-2xl font-bold tabular-nums">{report.currentCamp.volunteers}</div>
+          <div className="mt-2 text-2xl font-bold tabular-nums">{report.currentCamp?.volunteers ?? "—"}</div>
           <div className="mt-1 text-xs text-muted-foreground">Active volunteers rostered for this camp</div>
         </Card>
         <Card>
@@ -197,19 +174,43 @@ function Analytics({ report }: { report: Awaited<ReturnType<typeof getReportAnal
 function PatientHistory({ report }: { report: Awaited<ReturnType<typeof getReportAnalytics>> }) {
   return (
     <div className="mt-6 space-y-3">
-      <SectionTitle>Recent patients</SectionTitle>
-      {report.patients.map((p) => (
-        <Card key={p.id}>
-          <div className="flex items-center justify-between">
-            <div className="min-w-0">
-              <div className="font-semibold truncate">{p.name} <span className="text-xs text-muted-foreground">· {p.id}</span></div>
-              <div className="text-xs text-muted-foreground truncate">{p.age}y · {p.gender} · {p.village}</div>
-            </div>
-            <div className="text-[11px] text-muted-foreground">{p.visits.length + 1} visits</div>
+      <SectionTitle>Camp performance summary</SectionTitle>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          ["Total patients", report.totals.patients],
+          ["Consultations", report.campStats.consultations],
+          ["Completed", report.campStats.completedConsultations],
+          ["Medicines dispensed", report.totals.medicines],
+        ].map(([l, v]) => (
+          <div key={String(l)} className="rounded-xl bg-secondary/60 p-3">
+            <div className="text-[11px] text-muted-foreground">{l}</div>
+            <div className="text-lg font-bold tabular-nums">{v}</div>
           </div>
-          <div className="mt-2 text-xs text-foreground line-clamp-2">{p.symptoms}</div>
+        ))}
+      </div>
+      <SectionTitle>Common diagnoses</SectionTitle>
+      {report.analytics.commonIllnesses.length === 0 ? (
+        <Card><div className="text-xs text-muted-foreground text-center py-4">No consultation data yet</div></Card>
+      ) : (
+        <Card>
+          <div className="space-y-2">
+            {report.analytics.commonIllnesses.map((c) => {
+              const max = Math.max(...report.analytics.commonIllnesses.map((x) => x.count));
+              return (
+                <div key={c.name}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-foreground">{c.name}</span>
+                    <span className="text-muted-foreground tabular-nums">{c.count}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full" style={{ width: `${(c.count / max) * 100}%`, backgroundImage: "var(--gradient-primary)" }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </Card>
-      ))}
+      )}
     </div>
   );
 }
@@ -226,12 +227,12 @@ function CampReport({ report }: { report: Awaited<ReturnType<typeof getReportAna
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
           {[
-            ["Patients served", report.currentCamp.patientsServed],
-            ["Consultations", 41],
-            ["Prescriptions", 118],
-            ["Referrals", 4],
-            ["Volunteers", report.currentCamp.volunteers],
-            ["Doctors", report.currentCamp.doctors],
+            ["Patients served", report.currentCamp?.patientsServed ?? 0],
+            ["Consultations", report.campStats.consultations],
+            ["Prescriptions", report.campStats.prescriptions],
+            ["Referrals", report.totals.referrals],
+            ["Volunteers", report.currentCamp?.volunteers ?? "—"],
+            ["Doctors", report.currentCamp?.doctors ?? "—"],
           ].map(([l, v]) => (
             <div key={String(l)} className="rounded-xl bg-secondary/60 p-3">
               <div className="text-[11px] text-muted-foreground">{l}</div>

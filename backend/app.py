@@ -14,6 +14,7 @@ from routes.camp_routes import camp_bp, camp_dashboard_bp
 from routes.report_routes import report_bp
 from routes.health_passport_routes import health_passport_bp
 from routes.health_memory_routes import health_memory_bp
+from routes.sms_routes import sms_bp
 from models import User, Patient, Queue, Consultation, Prescription, Medicine, Camp, CampAssignment
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from datetime import datetime
@@ -52,6 +53,8 @@ def create_app(config_name=None):
     app.register_blueprint(report_bp, url_prefix='/api/reports')
     app.register_blueprint(health_passport_bp, url_prefix='/api')
     app.register_blueprint(health_memory_bp, url_prefix='/api/patients')
+    app.register_blueprint(sms_bp, url_prefix='/api/sms')
+
 
     # Global error handlers
     @app.errorhandler(400)

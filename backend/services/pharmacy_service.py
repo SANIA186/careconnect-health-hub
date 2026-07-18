@@ -6,6 +6,7 @@ from models.medicine import Medicine
 from models.prescription import Prescription
 from models.dispense_history import DispenseHistory
 from services.queue_service import QueueService
+from services.sms_service import SmsService
 
 class PharmacyService:
     @staticmethod
@@ -60,6 +61,20 @@ class PharmacyService:
         
         db.session.add(history)
         db.session.commit()
+
+        try:
+            SmsService.send_sms(
+                patient_id=patient.id,
+                message=(
+                    f"Dear {patient.full_name}, your medicine "
+                    f"{medicine.medicine_name} ({dispensed_quantity} {medicine.unit}) "
+                    f"has been dispensed. Instructions: {prescription.instructions}"
+                ),
+                sms_type='MEDICINE_DISPENSED'
+            )
+        except Exception as e:
+            print(f"SMS notification failed: {e}")
+
         
         return history
 

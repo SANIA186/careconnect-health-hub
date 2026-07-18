@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify
+# pyrefly: ignore [missing-import]
 from flask_jwt_extended import jwt_required
 from services.sms_service import SmsService
 from services.reminder_service import ReminderService
 from models.camp import Camp
 from models.patient import Patient
 
-sms_bp = Blueprint('sms_bp', __name__)
+# sms_bp = Blueprint('sms_bp', __name__)
+sms_bp = Blueprint('sms', __name__)
 
 @sms_bp.route('/logs', methods=['GET'])
 @jwt_required()

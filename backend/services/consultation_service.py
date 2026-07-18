@@ -1,10 +1,10 @@
 from datetime import datetime
 from database import db
+from services.sms_service import SmsService
 from models.consultation import Consultation
 from models.prescription import Prescription
-# from services.sms_service import SmsService
-from backend.services.sms_service import SmsService
-from backend.models.consultation import Consultation
+
+
 
 class ConsultationService:
     @staticmethod
@@ -96,17 +96,19 @@ class ConsultationService:
             duration=data.get('duration'),
             instructions=data.get('instructions')
         )
+
         db.session.add(prescription)
         db.session.commit()
+
+        # Automatic prescription SMS
         consultation = Consultation.query.get(consultation_id)
 
         if consultation and consultation.patient:
-            SmsService.send_sms(
-                patient_id=consultation.patient_id,
-                message="Dear Patient, your prescription has been generated. Please collect medicines from CareConnect pharmacy.",
-                sms_type="PRESCRIPTION"
+            SmsService.send_prescription_sms(
+                consultation.patient
             )
-            return prescription
+
+        return prescription
 
     @staticmethod
     def get_prescriptions(consultation_id):

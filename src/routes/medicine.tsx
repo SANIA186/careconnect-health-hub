@@ -62,7 +62,7 @@ function MedicinePage() {
 function Distribution({ patients, medicines, onDispense }: { patients: Patient[]; medicines: Medicine[]; onDispense: (patientId: string, prescriptions: Prescription[]) => Promise<void> }) {
   const [selectedPrescriptions, setSelectedPrescriptions] = useState<Record<string, Record<string, boolean>>>({});
   const [dispensingPatientId, setDispensingPatientId] = useState<string | null>(null);
-
+  const [previewPatientId, setPreviewPatientId] = useState<string | null>(null);
   const pending = patients.filter((p) => (p.status === "completed" || p.status === "in-consultation") && !p.medicineDispensed);
 
   const toggleSelection = (patientId: string, medicineName: string) => {
@@ -76,6 +76,7 @@ function Distribution({ patients, medicines, onDispense }: { patients: Patient[]
   };
 
   const handleDispense = async (patient: Patient) => {
+    setPreviewPatientId(patient.id);
     const latestVisit = patient.visits[patient.visits.length - 1];
     const selected = latestVisit?.prescriptions.filter((prescription) => selectedPrescriptions[patient.id]?.[prescription.medicine] ?? false) ?? [];
     if (selected.length === 0) {
@@ -95,7 +96,8 @@ function Distribution({ patients, medicines, onDispense }: { patients: Patient[]
     }
   };
 
-  const previewPatient = pending[0];
+  const previewPatient =
+  patients.find((patient) => patient.id === previewPatientId) ?? pending[0];
   const previewVisit = previewPatient?.visits[previewPatient.visits.length - 1];
   const previewMedicines = previewVisit?.prescriptions.map((entry) => entry.medicine) ?? [];
   const previewDosage = previewVisit?.prescriptions.map((entry) => `${entry.medicine} · ${entry.dosage}`) ?? [];

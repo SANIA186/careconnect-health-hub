@@ -1,6 +1,7 @@
 export type QueueStatus = "waiting" | "in-consultation" | "completed";
 
 export interface Prescription {
+  id?: number;       // Backend prescription ID (used for dispensing)
   medicine: string;
   dosage: string;
   duration: string;

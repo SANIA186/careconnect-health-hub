@@ -1,54 +1,89 @@
-import { mockMedicines } from "@/mock/medicines";
-import { mockPatients } from "@/mock/patients";
 import type { Medicine } from "@/types/medicine";
 import type { Patient, Prescription } from "@/types/patient";
+import { getPatientById } from "./patient.api";
+import { apiClient } from "./client";
+
+function mapBackendMedicineToFrontend(m: any): Medicine {
+  return {
+    id: String(m.id),
+    name: m.medicine_name,
+    category: m.category,
+    stock: m.stock_quantity,
+    minStock: m.reorder_level,
+    unit: m.unit,
+    expiry: m.expiry_date || "",
+    distributed: 0,
+  };
+}
 
 export async function getMedicines(): Promise<Medicine[]> {
-  await Promise.resolve();
-  return mockMedicines;
+  try {
+    const medicines = await apiClient<any[]>("/pharmacy/medicines");
+    return medicines.map(mapBackendMedicineToFrontend);
+  } catch (error) {
+    console.error("Failed to fetch medicines:", error);
+    throw error;
+  }
 }
 
 export async function getLowStockMedicines(): Promise<Medicine[]> {
-  await Promise.resolve();
-  return mockMedicines.filter((medicine) => medicine.stock < medicine.minStock);
+  try {
+    const medicines = await getMedicines();
+    return medicines.filter((medicine) => medicine.stock < medicine.minStock);
+  } catch (error) {
+    console.error("Failed to fetch low stock medicines:", error);
+    throw error;
+  }
 }
 
 export async function dispenseMedicines(patientId: string, prescriptions: Prescription[]): Promise<{ patient: Patient; medicines: Medicine[] }> {
-  await Promise.resolve();
-
-  const patient = mockPatients.find((entry) => entry.id === patientId);
-  if (!patient) {
-    throw new Error("Patient not found.");
-  }
-
   if (prescriptions.length === 0) {
     throw new Error("Select at least one medicine to dispense.");
   }
 
-  const inventory = new Map<string, Medicine>();
-  for (const medicine of mockMedicines) {
-    inventory.set(medicine.name.toLowerCase(), medicine);
-  }
-
-  for (const prescription of prescriptions) {
-    const medicineName = prescription.medicine.trim().toLowerCase();
-    const medicine = inventory.get(medicineName);
-    if (!medicine) {
-      throw new Error(`Medicine not found in inventory: ${prescription.medicine}`);
+  try {
+    // 1. Dispense each prescription on the backend
+    for (const rx of prescriptions) {
+      if (!rx.id) {
+        console.warn("Skipping prescription without backend ID:", rx.medicine);
+        continue;
+      }
+      await apiClient("/pharmacy/dispense", {
+        method: "POST",
+        body: JSON.stringify({
+          prescription_id: rx.id,
+          dispensed_quantity: 1 // Default quantity to dispense
+        })
+      });
     }
-    if (medicine.stock <= 0) {
-      throw new Error(`Insufficient stock for ${prescription.medicine}.`);
+
+    // 2. Fetch queue items to find this patient's queue_id
+    const queue = await apiClient<any[]>("/queue/today");
+    const queueItem = queue.find(q => String(q.patient_id) === String(patientId));
+
+    if (queueItem) {
+      // 3. Transition the queue status to Completed
+      await apiClient(`/pharmacy/queue/${queueItem.id}/complete`, {
+        method: "PATCH"
+      });
+    } else {
+      console.warn("Could not find queue item to complete pharmacy visit for patient:", patientId);
     }
-  }
 
-  for (const prescription of prescriptions) {
-    const medicineName = prescription.medicine.trim().toLowerCase();
-    const medicine = inventory.get(medicineName);
-    if (!medicine) continue;
-    medicine.stock -= 1;
-    medicine.distributed += 1;
-  }
+    // 4. Fetch updated patient and medicine inventory
+    const updatedPatient = await getPatientById(patientId);
+    if (!updatedPatient) {
+      throw new Error("Failed to fetch patient details after dispensing");
+    }
 
-  patient.medicineDispensed = true;
-  return { patient, medicines: mockMedicines };
+    const updatedMedicines = await getMedicines();
+
+    return {
+      patient: updatedPatient,
+      medicines: updatedMedicines
+    };
+  } catch (error) {
+    console.error("Failed to dispense medicines on backend:", error);
+    throw error;
+  }
 }
