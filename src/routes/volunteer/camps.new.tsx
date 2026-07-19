@@ -42,7 +42,7 @@ function NewCamp() {
         volunteersCount: volunteers,
         doctorsCount: doctors
       });
-      toast.success("Camp scheduled", { description: "Volunteers and Doctors will be notified." });
+      toast.success("Camp scheduled", { description: "Camp details saved successfully." });
       navigate({ to: "/volunteer" });
     } catch (error) {
       toast.error("Failed to schedule camp", { description: error instanceof Error ? error.message : "Please try again." });

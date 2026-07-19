@@ -27,11 +27,7 @@ def login():
     
     return jsonify({
         "access_token": access_token,
-        "user": {
-            "id": user.id,
-            "name": user.full_name,
-            "role": user.role
-        }
+        "user": user.to_dict()
     }), 200
 
 @auth_bp.route('/me', methods=['GET'])

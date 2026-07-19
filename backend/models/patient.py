@@ -14,6 +14,12 @@ class Patient(db.Model):
     address = db.Column(db.Text, nullable=False)
     blood_group = db.Column(db.String(10), nullable=True)
     emergency_contact = db.Column(db.String(50), nullable=True)
+    symptoms = db.Column(db.Text, nullable=True)
+    volunteer_notes = db.Column(db.Text, nullable=True)
+    bp = db.Column(db.String(20), nullable=True)
+    pulse = db.Column(db.String(20), nullable=True)
+    temperature = db.Column(db.String(20), nullable=True)
+    weight = db.Column(db.String(20), nullable=True)
     status = db.Column(db.String(50), default='Waiting') # Waiting, In Consultation, Completed
     camp_id = db.Column(db.Integer, db.ForeignKey('camps.id'), nullable=True)
 
@@ -38,6 +44,12 @@ class Patient(db.Model):
             "address": self.address,
             "blood_group": self.blood_group,
             "emergency_contact": self.emergency_contact,
+            "symptoms": self.symptoms,
+            "volunteer_notes": self.volunteer_notes,
+            "bp": self.bp,
+            "pulse": self.pulse,
+            "temperature": self.temperature,
+            "weight": self.weight,
             "status": self.status,
             "camp_id": self.camp_id,
             "qr_token": self.qr_token,

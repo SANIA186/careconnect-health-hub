@@ -35,6 +35,7 @@ function MedicinePage() {
     const result = await dispenseMedicines(patientId, prescriptions);
     setPatients((previous) => previous.map((patient) => (patient.id === patientId ? result.patient : patient)));
     setMedicines(result.medicines);
+    return result;
   }
 
   return (
@@ -59,7 +60,7 @@ function MedicinePage() {
   );
 }
 
-function Distribution({ patients, medicines, onDispense }: { patients: Patient[]; medicines: Medicine[]; onDispense: (patientId: string, prescriptions: Prescription[]) => Promise<void> }) {
+function Distribution({ patients, medicines, onDispense }: { patients: Patient[]; medicines: Medicine[]; onDispense: (patientId: string, prescriptions: Prescription[]) => Promise<{ patient: Patient; medicines: Medicine[]; smsStatus: string }> }) {
   const [selectedPrescriptions, setSelectedPrescriptions] = useState<Record<string, Record<string, boolean>>>({});
   const [dispensingPatientId, setDispensingPatientId] = useState<string | null>(null);
   const [previewPatientId, setPreviewPatientId] = useState<string | null>(null);
@@ -86,9 +87,19 @@ function Distribution({ patients, medicines, onDispense }: { patients: Patient[]
 
     setDispensingPatientId(patient.id);
     try {
-      await onDispense(patient.id, selected);
+      const result = await onDispense(patient.id, selected);
       setSelectedPrescriptions((previous) => ({ ...previous, [patient.id]: {} }));
-      toast.success("Dispensed successfully", { description: `${patient.name} · Token #${patient.token}` });
+      
+      let smsDesc = "";
+      if (result.smsStatus === 'CREDENTIALS_MISSING') {
+        smsDesc = "SMS Not Configured (Credentials Missing)";
+      } else if (result.smsStatus === 'SMS Sent Successfully') {
+        smsDesc = "SMS Sent Successfully";
+      } else {
+        smsDesc = "SMS Failed";
+      }
+      
+      toast.success("Dispensed successfully", { description: `${patient.name} · Token #${patient.token} · ${smsDesc}` });
     } catch (error) {
       toast.error("Dispense failed", { description: error instanceof Error ? error.message : "Please try again." });
     } finally {

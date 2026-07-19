@@ -16,17 +16,48 @@ function VolunteerHome() {
   const [patients, setPatients] = useState<Awaited<ReturnType<typeof getPatients>>>([]);
   const [currentCamp, setCurrentCamp] = useState<Awaited<ReturnType<typeof getCurrentCamp>> | null>(null);
   const [camps, setCamps] = useState<Awaited<ReturnType<typeof getCamps>>>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     void (async () => {
-      const [patientData, campData, campsData] = await Promise.all([getPatients(), getCurrentCamp(), getCamps()]);
-      setPatients(patientData);
-      setCurrentCamp(campData);
-      setCamps(campsData);
+      setIsLoading(true);
+      try {
+        const [patientData, campData, campsData] = await Promise.all([getPatients(), getCurrentCamp(), getCamps()]);
+        setPatients(patientData);
+        setCurrentCamp(campData);
+        setCamps(campsData);
+      } finally {
+        setIsLoading(false);
+      }
     })();
   }, []);
 
-  if (!currentCamp) return null;
+  if (isLoading) {
+    return (
+      <AppShell title="Namaste, Volunteer" subtitle="Volunteer • Welcome" hero actions={<BellButton />} bottomNav={<VolunteerNav />}>
+        <div className="flex flex-col items-center justify-center mt-12 text-center p-6 border border-dashed rounded-2xl bg-card">
+          <Tent className="h-12 w-12 text-muted-foreground mb-4 animate-pulse" />
+          <h2 className="text-xl font-bold">Loading...</h2>
+          <p className="text-sm text-muted-foreground mt-2 mb-6">Checking for active camps...</p>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!currentCamp) {
+    return (
+      <AppShell title="Namaste, Volunteer" subtitle="Volunteer • Welcome" hero actions={<BellButton />} bottomNav={<VolunteerNav />}>
+        <div className="flex flex-col items-center justify-center mt-12 text-center p-6 border border-dashed rounded-2xl bg-card">
+          <Tent className="h-12 w-12 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-bold">No Active Camp</h2>
+          <p className="text-sm text-muted-foreground mt-2 mb-6">There is no active camp right now. You can create a new one to start registering patients.</p>
+          <Link to="/volunteer/camps/new" className="rounded-xl bg-primary text-primary-foreground px-6 py-3 font-semibold text-sm">
+            Create Camp
+          </Link>
+        </div>
+      </AppShell>
+    );
+  }
 
   const waiting = patients.filter((p) => p.status === "waiting").length;
   const inConsult = patients.filter((p) => p.status === "in-consultation").length;

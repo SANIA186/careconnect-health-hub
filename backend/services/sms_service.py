@@ -1,3 +1,6 @@
+import os
+from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
 from database import db
 from models.sms_log import SmsLog
 from models.patient import Patient
@@ -6,20 +9,65 @@ class SmsService:
     @staticmethod
     def send_sms(patient_id, message, sms_type):
         """
-        Creates an SMS log entry. 
-        Future: integrate with Twilio/MSG91 here.
+        Sends an SMS using Twilio and logs it.
         """
         patient = db.session.get(Patient, patient_id)
         if not patient:
             raise ValueError(f"Patient {patient_id} not found")
 
-        log = SmsLog(
-            patient_id=patient_id,
-            phone_number=patient.phone,
-            message=message,
-            sms_type=sms_type,
-            status='PENDING'
-        )
+        account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+        auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+        twilio_number = os.environ.get('TWILIO_PHONE_NUMBER')
+
+        if not account_sid or not auth_token or not twilio_number:
+            log = SmsLog(
+                patient_id=patient_id,
+                phone_number=patient.phone,
+                message=message,
+                sms_type=sms_type,
+                status='CREDENTIALS_MISSING'
+            )
+            db.session.add(log)
+            db.session.commit()
+            return log
+
+        try:
+            client = Client(account_sid, auth_token)
+            
+            # Note: Twilio requires phones in E.164 format (e.g. +1234567890)
+            # We assume patient.phone is correctly formatted or we just try sending
+            twilio_msg = client.messages.create(
+                body=message,
+                from_=twilio_number,
+                to=patient.phone
+            )
+            
+            log = SmsLog(
+                patient_id=patient_id,
+                phone_number=patient.phone,
+                message=message,
+                sms_type=sms_type,
+                status='SMS Sent Successfully'
+            )
+        except TwilioRestException as e:
+            print(f"Twilio error: {e}")
+            log = SmsLog(
+                patient_id=patient_id,
+                phone_number=patient.phone,
+                message=message,
+                sms_type=sms_type,
+                status='SMS Failed'
+            )
+        except Exception as e:
+            print(f"Unknown SMS error: {e}")
+            log = SmsLog(
+                patient_id=patient_id,
+                phone_number=patient.phone,
+                message=message,
+                sms_type=sms_type,
+                status='SMS Failed'
+            )
+
         db.session.add(log)
         db.session.commit()
         return log

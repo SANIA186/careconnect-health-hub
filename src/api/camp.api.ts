@@ -20,9 +20,7 @@ function mapBackendCampToFrontend(c: any): Camp {
 export async function getCamps(): Promise<Camp[]> {
   try {
     const camps = await apiClient<any[]>("/camps");
-    const mappedCamps: Camp[] = [];
-    
-    for (const c of camps) {
+    const mappedCamps: Camp[] = await Promise.all(camps.map(async (c) => {
       let stats = { total_patients: 0 };
       try {
         stats = await apiClient<any>(`/camps/${c.id}/stats`);
@@ -30,8 +28,8 @@ export async function getCamps(): Promise<Camp[]> {
       
       const mapped = mapBackendCampToFrontend(c);
       mapped.patientsServed = stats.total_patients;
-      mappedCamps.push(mapped);
-    }
+      return mapped;
+    }));
     
     return mappedCamps;
   } catch (error) {

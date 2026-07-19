@@ -21,9 +21,14 @@ export function mapBackendQueueToFrontendPatient(queueItem: any, medicineMap?: M
     village: p.village || p.address,
     campId: String(p.camp_id || "0"),
     status: mapStatusBackendToFrontend(status),
-    symptoms: "Not recorded (Backend DB structure pending)", 
-    vitals: { bp: "—", pulse: "—", temp: "—", weight: "—" },
-    volunteerNotes: "Not recorded",
+    symptoms: p.symptoms || "Not recorded", 
+    vitals: { 
+      bp: p.bp || "—", 
+      pulse: p.pulse || "—", 
+      temp: p.temperature || "—", 
+      weight: p.weight || "—" 
+    },
+    volunteerNotes: p.volunteer_notes || "Not recorded",
     registeredAt: queueItem.created_at ? new Date(queueItem.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "",
     medicineDispensed: status === "Completed",
     visits: p.consultations ? p.consultations.map((c: any) => ({
@@ -58,9 +63,14 @@ export function mapBackendPatientToFrontendPatient(p: any, medicineMap?: Map<num
     village: p.village || p.address,
     campId: String(p.camp_id || "0"),
     status: mapStatusBackendToFrontend(status),
-    symptoms: "Not recorded", 
-    vitals: { bp: "—", pulse: "—", temp: "—", weight: "—" },
-    volunteerNotes: "Not recorded",
+    symptoms: p.symptoms || "Not recorded", 
+    vitals: { 
+      bp: p.bp || "—", 
+      pulse: p.pulse || "—", 
+      temp: p.temperature || "—", 
+      weight: p.weight || "—" 
+    },
+    volunteerNotes: p.volunteer_notes || "Not recorded",
     registeredAt: p.created_at ? new Date(p.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "",
     medicineDispensed: status === "Completed",
     visits: p.consultations ? p.consultations.map((c: any) => ({
@@ -173,9 +183,14 @@ export function getNextPatientId(): string {
   return "P-0";
 }
 
-/** @deprecated Backend assigns queue tokens. This is kept only for type compatibility. */
-export function getNextQueueToken(): number {
-  return 0;
+export async function getNextQueueToken(): Promise<number> {
+  try {
+    const data = await apiClient<any>("/dashboard/summary");
+    return data.next_token || 1;
+  } catch (error) {
+    console.error("Failed to fetch next token", error);
+    return 1;
+  }
 }
 
 function validateRegistrationInput(input: PatientRegistrationInput): void {
@@ -204,6 +219,9 @@ export async function registerPatient(
   validateRegistrationInput(input);
 
   try {
+    const currentCamp = await import("./camp.api").then(m => m.getCurrentCamp());
+    const campId = currentCamp ? parseInt(currentCamp.id, 10) : 1;
+
     const response = await apiClient<any>("/patients", {
       method: "POST",
       body: JSON.stringify({
@@ -213,22 +231,40 @@ export async function registerPatient(
         phone: input.phone?.trim() ?? "0000000000", // Backend requires phone
         village: input.village.trim(),
         address: input.village.trim(), // Map village to address as well since required
-        camp_id: 1, // Defaulting to 1 as per previous mock logic
+        camp_id: campId,
+        symptoms: input.symptoms,
+        volunteer_notes: input.volunteerNotes || "",
+        bp: input.vitals?.bp || "",
+        pulse: input.vitals?.pulse || "",
+        temperature: input.vitals?.temp || "",
+        weight: input.vitals?.weight || "",
       }),
     });
 
     if (response.patient_id) {
-      // Fetch the full queue to find the token number and full patient details
-      const queue = await apiClient<any[]>("/queue/today");
-      const queueItem = queue.find(q => String(q.patient_id) === String(response.patient_id));
-      
-      if (queueItem) {
-         return mapBackendQueueToFrontendPatient(queueItem);
-      }
-      
-      // Fallback if queue item not found for some reason
-      const patient = await apiClient<any>(`/patients/${response.patient_id}`);
-      return mapBackendPatientToFrontendPatient(patient);
+      // Return constructed patient directly to avoid race conditions!
+      return {
+        id: String(response.patient_id),
+        token: response.token_number || 0,
+        name: input.name.trim(),
+        age: Number(input.age),
+        gender: input.gender,
+        phone: input.phone?.trim() ?? "0000000000",
+        village: input.village.trim(),
+        campId: String(campId),
+        status: "waiting",
+        symptoms: input.symptoms || "Not recorded",
+        vitals: { 
+          bp: input.vitals?.bp || "—", 
+          pulse: input.vitals?.pulse || "—", 
+          temp: input.vitals?.temp || "—", 
+          weight: input.vitals?.weight || "—" 
+        },
+        volunteerNotes: input.volunteerNotes || "Not recorded",
+        registeredAt: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+        medicineDispensed: false,
+        visits: []
+      };
     }
   } catch (error) {
     console.error("Backend registration failed:", error);

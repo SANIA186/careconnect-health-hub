@@ -29,6 +29,12 @@ class PatientService:
             address=data.get('address'),
             blood_group=data.get('blood_group'),
             emergency_contact=data.get('emergency_contact'),
+            symptoms=data.get('symptoms'),
+            volunteer_notes=data.get('volunteer_notes'),
+            bp=data.get('bp'),
+            pulse=data.get('pulse'),
+            temperature=data.get('temperature'),
+            weight=data.get('weight'),
             camp_id=data.get('camp_id'),
             status='Waiting'
         )
@@ -36,10 +42,10 @@ class PatientService:
         db.session.add(patient)
         db.session.flush() # flush to get patient.id
         
-        QueueService.add_to_queue(patient.id, data.get('priority', 'Normal'))
+        queue_item = QueueService.add_to_queue(patient.id, data.get('priority', 'Normal'))
         
         db.session.commit()
-        return patient
+        return patient, queue_item
 
     @staticmethod
     def get_all_patients():

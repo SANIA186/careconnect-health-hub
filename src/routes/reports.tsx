@@ -220,10 +220,10 @@ function CampReport({ report }: { report: Awaited<ReturnType<typeof getReportAna
     <div className="mt-6 space-y-4">
       <Card>
         <div className="text-xs font-semibold text-primary uppercase tracking-wide">Camp report</div>
-        <div className="mt-1 font-bold text-lg">{report.currentCamp.name}</div>
+        <div className="mt-1 font-bold text-lg">{report.currentCamp?.name ?? "No Camp Available"}</div>
         <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{report.currentCamp.date}</span>
-          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{report.currentCamp.location}</span>
+          <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{report.currentCamp?.date ?? "N/A"}</span>
+          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{report.currentCamp?.location ?? "N/A"}</span>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
           {[

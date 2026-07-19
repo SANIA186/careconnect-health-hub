@@ -12,7 +12,7 @@ function mapBackendMedicineToFrontend(m: any): Medicine {
     minStock: m.reorder_level,
     unit: m.unit,
     expiry: m.expiry_date || "",
-    distributed: 0,
+    distributed: m.distributed || 0,
   };
 }
 
@@ -36,25 +36,36 @@ export async function getLowStockMedicines(): Promise<Medicine[]> {
   }
 }
 
-export async function dispenseMedicines(patientId: string, prescriptions: Prescription[]): Promise<{ patient: Patient; medicines: Medicine[] }> {
+export async function dispenseMedicines(patientId: string, prescriptions: Prescription[]): Promise<{ patient: Patient; medicines: Medicine[]; smsStatus: string }> {
   if (prescriptions.length === 0) {
     throw new Error("Select at least one medicine to dispense.");
   }
 
   try {
+    let smsStatus = "PENDING";
     // 1. Dispense each prescription on the backend
     for (const rx of prescriptions) {
       if (!rx.id) {
         console.warn("Skipping prescription without backend ID:", rx.medicine);
         continue;
       }
-      await apiClient("/pharmacy/dispense", {
+      const response = await apiClient<any>("/pharmacy/dispense", {
         method: "POST",
         body: JSON.stringify({
           prescription_id: rx.id,
           dispensed_quantity: 1 // Default quantity to dispense
         })
       });
+      if (response.sms_payload) {
+         try {
+             const payload = JSON.parse(response.sms_payload);
+             if (payload.status) {
+                 smsStatus = payload.status;
+             }
+         } catch (e) {
+             console.warn("Failed to parse SMS payload", e);
+         }
+      }
     }
 
     // 2. Fetch queue items to find this patient's queue_id
@@ -80,7 +91,8 @@ export async function dispenseMedicines(patientId: string, prescriptions: Prescr
 
     return {
       patient: updatedPatient,
-      medicines: updatedMedicines
+      medicines: updatedMedicines,
+      smsStatus
     };
   } catch (error) {
     console.error("Failed to dispense medicines on backend:", error);

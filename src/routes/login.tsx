@@ -9,6 +9,8 @@ import {
   HeartPulse,
 } from "lucide-react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { loginUser } from "@/api/auth.api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -117,7 +119,7 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [phoneError, setPhoneError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const passwordStrength = getPasswordStrength(password);
 
@@ -155,59 +157,68 @@ function LoginPage() {
         </div>
         <p className="mt-2 text-xs text-muted-foreground">{active.desc}</p>
 
-        <form
+          <form
             className="mt-6 space-y-4"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
 
-              const trimmedPhone = phone.trim();
               const trimmedEmail = email.trim();
-              const passwordIssues = validatePassword(password);
-              const nextPhoneError = trimmedPhone ? "" : "Phone number is required.";
-              const nextPasswordError = passwordIssues.length
-                ? `Password must include ${passwordIssues.join(", ")}.`
-                : "";
+              const nextEmailError = trimmedEmail ? "" : "Email is required.";
+              const nextPasswordError = password ? "" : "Password is required.";
 
-              setPhoneError(nextPhoneError);
+              setEmailError(nextEmailError);
               setPasswordError(nextPasswordError);
 
-              if (nextPhoneError || nextPasswordError) {
+              if (nextEmailError || nextPasswordError) {
                 return;
               }
 
               setLoading(true);
 
-              setTimeout(() => {
+              try {
+                const user = await loginUser(trimmedEmail, password);
+                if (user) {
+                  toast.success("Successfully logged in");
+                  // Redirect based on user's actual role from the backend
+                  const backendRole = user.role.toLowerCase();
+                  if (backendRole === "admin") navigate({ to: "/reports" });
+                  else if (backendRole === "doctor") navigate({ to: "/doctor" });
+                  else if (backendRole === "pharmacist") navigate({ to: "/medicine" });
+                  else navigate({ to: "/volunteer" });
+                } else {
+                  toast.error("Invalid email or password");
+                  setPasswordError("Invalid credentials");
+                }
+              } catch (error: any) {
+                toast.error(error.message || "An error occurred during login");
+              } finally {
                 setLoading(false);
-                navigate({ to: active.to });
-              }, 1200);
+              }
             }}
           >
           <label className="block">
-            <span className="text-xs font-medium text-foreground">Phone number</span>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => {
-                setPhone(e.target.value);
-                if (e.target.value.trim()) {
-                  setPhoneError("");
-                }
-              }}
-              placeholder="+1 555 123 4567"
-              className="mt-1.5 w-full h-12 rounded-xl bg-input/60 border border-border px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            {phoneError ? <p className="mt-1 text-xs text-red-500">{phoneError}</p> : null}
-          </label>
-          <label className="block">
             <span className="text-xs font-medium text-foreground">
-              Email <span className="text-muted-foreground">(optional)</span>
+              Email
             </span>
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (e.target.value.trim()) setEmailError("");
+              }}
               placeholder={active.placeholder}
+              className="mt-1.5 w-full h-12 rounded-xl bg-input/60 border border-border px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            {emailError ? <p className="mt-1 text-xs text-red-500">{emailError}</p> : null}
+          </label>
+          <label className="block">
+            <span className="text-xs font-medium text-foreground">Phone number <span className="text-muted-foreground">(optional)</span></span>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 555 123 4567"
               className="mt-1.5 w-full h-12 rounded-xl bg-input/60 border border-border px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </label>
@@ -222,9 +233,7 @@ function LoginPage() {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  if (validatePassword(e.target.value).length === 0) {
-                    setPasswordError("");
-                  }
+                  setPasswordError("");
                 }}
                 placeholder="••••••••"
                 className="w-full h-12 rounded-xl bg-input/60 border border-border px-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-ring"

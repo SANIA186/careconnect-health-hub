@@ -15,16 +15,44 @@ export const Route = createFileRoute("/doctor/")({
 function DoctorHome() {
   const [patients, setPatients] = useState<Awaited<ReturnType<typeof getPatients>>>([]);
   const [currentCamp, setCurrentCamp] = useState<Awaited<ReturnType<typeof getCurrentCamp>> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     void (async () => {
-      const [patientData, campData] = await Promise.all([getPatients(), getCurrentCamp()]);
-      setPatients(patientData);
-      setCurrentCamp(campData);
+      setIsLoading(true);
+      try {
+        const [patientData, campData] = await Promise.all([getPatients(), getCurrentCamp()]);
+        setPatients(patientData);
+        setCurrentCamp(campData);
+      } finally {
+        setIsLoading(false);
+      }
     })();
   }, []);
 
-  if (!currentCamp) return null;
+  if (isLoading) {
+    return (
+      <AppShell title="Doctor Dashboard" subtitle="Loading..." hero actions={<BellButton />} bottomNav={<DoctorNav />}>
+        <div className="flex flex-col items-center justify-center mt-12 text-center p-6 border border-dashed rounded-2xl bg-card">
+          <Stethoscope className="h-12 w-12 text-muted-foreground mb-4 animate-pulse" />
+          <h2 className="text-xl font-bold">Loading...</h2>
+          <p className="text-sm text-muted-foreground mt-2">Checking for active camps...</p>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!currentCamp) {
+    return (
+      <AppShell title="Doctor Dashboard" subtitle="No active camp" hero actions={<BellButton />} bottomNav={<DoctorNav />}>
+        <div className="flex flex-col items-center justify-center mt-12 text-center p-6 border border-dashed rounded-2xl bg-card">
+          <Stethoscope className="h-12 w-12 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-bold">No Active Camp</h2>
+          <p className="text-sm text-muted-foreground mt-2">There is no active camp right now. Please wait for a volunteer to start one.</p>
+        </div>
+      </AppShell>
+    );
+  }
 
   const waiting = patients.filter((p) => p.status === "waiting");
   const active = patients.filter((p) => p.status === "in-consultation");

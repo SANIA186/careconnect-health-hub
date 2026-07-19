@@ -90,8 +90,11 @@ def create_app(config_name=None):
                 
                 volunteer = User(full_name='Volunteer User', email='volunteer@careconnect.org', role='Volunteer')
                 volunteer.set_password('Volunteer@123')
+
+                pharmacist = User(full_name='Pharmacist User', email='pharmacist@careconnect.org', role='Pharmacist')
+                pharmacist.set_password('Pharmacist@123')
                 
-                db.session.add_all([admin, doctor, volunteer])
+                db.session.add_all([admin, doctor, volunteer, pharmacist])
                 db.session.commit()
                 app.logger.info("Seed data created successfully.")
             

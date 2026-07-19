@@ -21,35 +21,131 @@ class PharmacyService:
     @staticmethod
     def get_all_medicines():
         medicines = Medicine.query.order_by(Medicine.medicine_name.asc()).all()
-        return [m.to_dict() for m in medicines]
+        result = []
+        for m in medicines:
+            distributed = db.session.query(db.func.sum(DispenseHistory.dispensed_quantity))\
+                .filter(DispenseHistory.medicine_id == m.id).scalar() or 0
+            med_dict = m.to_dict()
+            med_dict['distributed'] = int(distributed)
+            result.append(med_dict)
+        return result
+
+    # @staticmethod
+    # def dispense_medicine(data):
+    #     prescription_id = data.get('prescription_id')
+    #     dispensed_quantity = data.get('dispensed_quantity', 1)
+        
+    #     prescription = db.session.get(Prescription, prescription_id)
+    #     if not prescription:
+    #         raise ValueError("Prescription not found")
+            
+    #     medicine = db.session.get(Medicine, prescription.medicine_id)
+    #     if not medicine:
+    #         raise ValueError("Medicine not found")
+            
+    #     if medicine.stock_quantity < dispensed_quantity:
+    #         raise ValueError(f"Insufficient stock for {medicine.medicine_name}")
+            
+    #     # Deduct stock
+    #     medicine.stock_quantity -= dispensed_quantity
+        
+    #     sms_status = "PENDING"
+    #     try:
+    #         log = SmsService.send_sms(
+    #             patient_id=patient.id,
+    #             message=(
+    #                 f"Dear {patient.full_name}, your medicine "
+    #                 f"{medicine.medicine_name} ({dispensed_quantity} {medicine.unit}) "
+    #                 f"has been dispensed. Instructions: {prescription.instructions}"
+    #             ),
+    #             sms_type='MEDICINE_DISPENSED'
+    #         )
+    #         sms_status = log.status
+    #     except Exception as e:
+    #         print(f"SMS notification failed: {e}")
+    #         sms_status = "SMS Failed"
+
+    #     sms_payload = json.dumps({
+    #         "to": patient.phone,
+    #         "message": f"Dear {patient.full_name}, your medicine {medicine.medicine_name} ({dispensed_quantity} {medicine.unit}) has been dispensed. Instructions: {prescription.instructions}",
+    #         "generated_at": datetime.now().isoformat(),
+    #         "status": sms_status
+    #     })
+        
+    #     # Save dispense history
+    #     history = DispenseHistory(
+    #         prescription_id=prescription_id,
+    #         medicine_id=medicine.id,
+    #         patient_id=patient.id,
+    #         dispensed_quantity=dispensed_quantity,
+    #         sms_payload=sms_payload
+    #     )
+        
+    #     db.session.add(history)
+    #     db.session.commit()
+    #     return history
 
     @staticmethod
     def dispense_medicine(data):
         prescription_id = data.get('prescription_id')
         dispensed_quantity = data.get('dispensed_quantity', 1)
-        
+
         prescription = db.session.get(Prescription, prescription_id)
         if not prescription:
             raise ValueError("Prescription not found")
-            
+
         medicine = db.session.get(Medicine, prescription.medicine_id)
         if not medicine:
             raise ValueError("Medicine not found")
-            
+
+        # Get patient linked to the prescription
+        from models.patient import Patient
+        patient = prescription.consultation.patient if prescription.consultation else None
+        if not patient:
+            raise ValueError("Patient not found")
+
         if medicine.stock_quantity < dispensed_quantity:
-            raise ValueError(f"Insufficient stock for {medicine.medicine_name}")
-            
+            raise ValueError(
+                f"Insufficient stock for {medicine.medicine_name}"
+            )
+
         # Deduct stock
         medicine.stock_quantity -= dispensed_quantity
-        
-        # Determine SMS payload
-        patient = prescription.consultation.patient
+
+        sms_status = "PENDING"
+
+        try:
+            log = SmsService.send_sms(
+                patient_id=patient.id,
+                message=(
+                    f"Dear {patient.full_name}, your medicine "
+                    f"{medicine.medicine_name} "
+                    f"({dispensed_quantity} {medicine.unit}) "
+                    f"has been dispensed. Instructions: "
+                    f"{prescription.instructions}"
+                ),
+                sms_type='MEDICINE_DISPENSED'
+            )
+
+            sms_status = log.status
+
+        except Exception as e:
+            print(f"SMS notification failed: {e}")
+            sms_status = "SMS Failed"
+
         sms_payload = json.dumps({
             "to": patient.phone,
-            "message": f"Dear {patient.full_name}, your medicine {medicine.medicine_name} ({dispensed_quantity} {medicine.unit}) has been dispensed. Instructions: {prescription.instructions}",
-            "generated_at": datetime.now().isoformat()
+            "message": (
+                f"Dear {patient.full_name}, your medicine "
+                f"{medicine.medicine_name} "
+                f"({dispensed_quantity} {medicine.unit}) "
+                f"has been dispensed. Instructions: "
+                f"{prescription.instructions}"
+            ),
+            "generated_at": datetime.now().isoformat(),
+            "status": sms_status
         })
-        
+
         # Save dispense history
         history = DispenseHistory(
             prescription_id=prescription_id,
@@ -58,24 +154,10 @@ class PharmacyService:
             dispensed_quantity=dispensed_quantity,
             sms_payload=sms_payload
         )
-        
+
         db.session.add(history)
         db.session.commit()
 
-        try:
-            SmsService.send_sms(
-                patient_id=patient.id,
-                message=(
-                    f"Dear {patient.full_name}, your medicine "
-                    f"{medicine.medicine_name} ({dispensed_quantity} {medicine.unit}) "
-                    f"has been dispensed. Instructions: {prescription.instructions}"
-                ),
-                sms_type='MEDICINE_DISPENSED'
-            )
-        except Exception as e:
-            print(f"SMS notification failed: {e}")
-
-        
         return history
 
     @staticmethod

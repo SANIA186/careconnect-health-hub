@@ -101,8 +101,8 @@ export async function getReportAnalytics() {
       patients: overview.total_patients,
       consultations: overview.total_consultations,
       medicines: overview.total_medicines_dispensed,
-      // Referrals not tracked as a separate metric in the backend; default to 0
-      referrals: 0,
+      // Referrals not tracked as a separate metric in the backend; default to Unsupported
+      referrals: "Unsupported",
     },
     // Detailed camp-level stats for CampReport panel
     campStats: {

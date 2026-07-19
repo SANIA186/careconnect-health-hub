@@ -14,10 +14,11 @@ def create_patient():
         return jsonify({"error": "Bad Request", "message": "Missing required fields"}), 400
         
     try:
-        patient = PatientService.create_patient(data)
+        patient, queue_item = PatientService.create_patient(data)
         return jsonify({
             "patient_id": patient.id,
             "patient_code": patient.patient_code,
+            "token_number": queue_item.token_number,
             "message": "Patient registered successfully"
         }), 201
     except Exception as e:
